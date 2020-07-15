@@ -8,7 +8,7 @@ loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JO
 loadrt hostmot2
 loadrt hm2_eth board_ip="192.168.1.121" config=" num_encoders=0 num_pwmgens=0 num_stepgens=5 sserial_port_0=00xxxx" 
 setp    hm2_7i76e.0.watchdog.timeout_ns 5000000
-loadrt pid names=pid.x,pid.b,pid.z,pid.z2,pid.s
+loadrt pid names=pid.x,pid.b,pid.z,pid.z2,pid.e
 
 addf hm2_7i76e.0.read          servo-thread
 addf motion-command-handler   servo-thread
@@ -17,7 +17,7 @@ addf pid.x.do-pid-calcs       servo-thread
 addf pid.b.do-pid-calcs       servo-thread
 addf pid.z.do-pid-calcs       servo-thread
 addf pid.z2.do-pid-calcs       servo-thread
-addf pid.s.do-pid-calcs       servo-thread
+addf pid.e.do-pid-calcs       servo-thread			#Extruder
 addf hm2_7i76e.0.write         servo-thread
 setp hm2_7i76e.0.dpll.01.timer-us -50
 setp hm2_7i76e.0.stepgen.timer-number 1
@@ -243,6 +243,56 @@ net home-b     =>  joint.3.home-sw-in
 net b-neg-limit     =>  joint.3.neg-lim-sw-in
 net b-pos-limit     =>  joint.3.pos-lim-sw-in
 
+#*******************
+#  AXIS E JOINT 4
+#*******************
+
+setp   pid.e.Pgain     [JOINT_4]P
+setp   pid.e.Igain     [JOINT_4]I
+setp   pid.e.Dgain     [JOINT_4]D
+setp   pid.e.bias      [JOINT_4]BIAS
+setp   pid.e.FF0       [JOINT_4]FF0
+setp   pid.e.FF1       [JOINT_4]FF1
+setp   pid.e.FF2       [JOINT_4]FF2
+setp   pid.e.deadband  [JOINT_4]DEADBAND
+setp   pid.e.maxoutput [JOINT_4]MAX_OUTPUT
+setp   pid.e.error-previous-target true
+setp   pid.e.maxerror .0005
+
+net e-index-enable  <=> pid.e.index-enable
+net e-enable        =>  pid.e.enable
+net e-pos-cmd       =>  pid.e.command
+net e-pos-fb        =>  pid.e.feedback
+net e-output        <=  pid.e.output
+
+# Step Gen signals/setup
+
+setp   hm2_7i76e.0.stepgen.04.dirsetup        [JOINT_4]DIRSETUP
+setp   hm2_7i76e.0.stepgen.04.dirhold         [JOINT_4]DIRHOLD
+setp   hm2_7i76e.0.stepgen.04.steplen         [JOINT_4]STEPLEN
+setp   hm2_7i76e.0.stepgen.04.stepspace       [JOINT_4]STEPSPACE
+setp   hm2_7i76e.0.stepgen.04.position-scale  [JOINT_4]STEP_SCALE
+setp   hm2_7i76e.0.stepgen.04.step_type        0
+setp   hm2_7i76e.0.stepgen.04.control-type     1
+setp   hm2_7i76e.0.stepgen.04.maxaccel         [JOINT_4]STEPGEN_MAXACCEL
+setp   hm2_7i76e.0.stepgen.04.maxvel           [JOINT_4]STEPGEN_MAXVEL
+
+# ---closedloop stepper signals---
+
+net e-pos-cmd    <= joint.4.motor-pos-cmd
+net e-vel-cmd    <= joint.4.vel-cmd
+net e-output     <= hm2_7i76e.0.stepgen.04.velocity-cmd
+net e-pos-fb     <= hm2_7i76e.0.stepgen.04.position-fb
+net e-pos-fb     => joint.4.motor-pos-fb
+net e-enable     <= joint.4.amp-enable-out
+net e-enable     => hm2_7i76e.0.stepgen.04.enable
+
+# ---setup home / limit switch signals---
+
+#net home-b     =>  joint.3.home-sw-in
+#net b-neg-limit     =>  joint.3.neg-lim-sw-in
+#net b-pos-limit     =>  joint.3.pos-lim-sw-in
+
 #******************************
 # connect miscellaneous signals
 #******************************
@@ -272,6 +322,11 @@ net spindle-manual-stop   halui.spindle.0.stop
 net machine-is-on         halui.machine.is-on
 net jog-speed             halui.axis.jog-speed
 net MDI-mode              halui.mode.is-mdi
+net axis-select-e  halui.axis.w.select
+net jog-e-pos      halui.axis.w.plus
+net jog-e-neg      halui.axis.w.minus
+net jog-e-analog   halui.axis.w.analog
+net e-is-homed     halui.joint.4.is-homed
 
 #  ---coolant signals---
 
