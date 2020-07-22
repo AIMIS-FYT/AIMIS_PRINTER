@@ -36,7 +36,7 @@ net home-z2     <=  hm2_7i76e.0.7i76.0.0.input-05
 net home-x     <=  hm2_7i76e.0.7i76.0.0.input-06
 
 # --- HOME-Y ---
-#net home-y     <=  hm2_7i76e.0.7i76.0.0.input-07
+net home-b     <=  hm2_7i76e.0.7i76.0.0.input-07
 
 
 
@@ -289,9 +289,9 @@ net e-enable     => hm2_7i76e.0.stepgen.04.enable
 
 # ---setup home / limit switch signals---
 
-#net home-b     =>  joint.3.home-sw-in
-#net b-neg-limit     =>  joint.3.neg-lim-sw-in
-#net b-pos-limit     =>  joint.3.pos-lim-sw-in
+#net home-b     =>  joint.4.home-sw-in
+net e-neg-limit     =>  joint.4.neg-lim-sw-in
+net e-pos-limit     =>  joint.4.pos-lim-sw-in
 
 #******************************
 # connect miscellaneous signals

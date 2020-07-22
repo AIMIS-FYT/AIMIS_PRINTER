@@ -1,0 +1,4 @@
+#Wie man den Netbefehl nutzt
+#net <signalnamen> <pin1> => <pin2>
+
+net progstart hm2_7i76e.0.7i76.0.0.input-08-not => halui.program.run
